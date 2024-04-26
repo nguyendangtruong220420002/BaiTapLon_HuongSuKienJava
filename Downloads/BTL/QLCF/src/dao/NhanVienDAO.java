@@ -83,6 +83,7 @@ public class NhanVienDAO {
             ps.executeUpdate();
         }
     }
+    //tìm nhan viên
     public List<NhanVien> searchNhanVien(String searchTerm) throws SQLException {
         List<NhanVien> searchResults = new ArrayList<>();
         String sql = "SELECT * FROM QLNV WHERE maNV LIKE ? OR tenNV LIKE ? OR gioiTinh LIKE ? OR ngaySinh LIKE ? OR sdt LIKE ? OR diaChi LIKE ? OR taiKhoan LIKE ? OR matKhau LIKE ?";
