@@ -170,6 +170,7 @@ public class qlnuocFr extends JFrame {
 		tfDonVi.setText("");
 		tfSoLuong.setText("");
 		tfGia.setText("");
+		tfFind.setText("");
 		lbTrangthai.setText("Trạng Thái");
 		btnAdd.setEnabled(true);
 		btnSave.setEnabled(false);
@@ -766,6 +767,8 @@ public class qlnuocFr extends JFrame {
 	}
 
 	private void btnFindActionPerformed() {
+		btnCancel.setEnabled(true);
+		
 		String searchTerm = tfFind.getText();
 		if (!searchTerm.isEmpty()) {
 			List<Nuoc> searchResults = nuoc_Dao.timNuoc(searchTerm); // Gọi phương thức tìm kiếm từ DAO

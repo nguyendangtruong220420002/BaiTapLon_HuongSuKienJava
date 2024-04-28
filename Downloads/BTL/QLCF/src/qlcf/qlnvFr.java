@@ -160,6 +160,7 @@ public class qlnvFr extends JFrame {
 		pass.setText("");
 		passConfirm.setText("");
 		tfDiachi.setText("");
+		tfFind.setText("");
 		lbTrangthai.setText("Trạng Thái");
 		rbNam.setSelected(false);
 		btnEdit.setEnabled(false);
@@ -362,6 +363,8 @@ public class qlnvFr extends JFrame {
 		btnCancel = new JButton();
 		btnBack = new JButton();
 		lbTrangthai = new JLabel();
+		
+		
 
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Quản lý nhân viên");
@@ -747,14 +750,14 @@ public class qlnvFr extends JFrame {
 		int click = tableNV.getSelectedRow();
 		TableModel model = tableNV.getModel();
 
-		tfMaNV.setText(model.getValueAt(click, 0).toString());
-		tfHoten.setText(model.getValueAt(click, 1).toString());
-		((JTextField) tfNgaysinh.getDateEditor().getUiComponent()).setText(model.getValueAt(click, 3).toString());
-		tfSDT.setText(model.getValueAt(click, 4).toString());
-		tfDiachi.setText(model.getValueAt(click, 5).toString());
+		tfMaNV.setText(model.getValueAt(click, 0).toString().trim());
+		tfHoten.setText(model.getValueAt(click, 1).toString().trim());
+		((JTextField) tfNgaysinh.getDateEditor().getUiComponent()).setText(model.getValueAt(click, 3).toString().trim());
+		tfSDT.setText(model.getValueAt(click, 4).toString().trim());
+		tfDiachi.setText(model.getValueAt(click, 5).toString().trim());
 
-		checkGT(model.getValueAt(click, 2).toString());
-		loadAccount(model.getValueAt(click, 0).toString());
+		checkGT(model.getValueAt(click, 2).toString().trim());
+		loadAccount(model.getValueAt(click, 0).toString().trim());
 
 		btnEdit.setEnabled(true);
 		btnDel.setEnabled(true);
@@ -805,6 +808,8 @@ public class qlnvFr extends JFrame {
 	}
 
 	private void btnFindActionPerformed() {
+		btnCancel.setEnabled(true);
+	
 		String searchTerm = tfFind.getText();
 		if (!searchTerm.isEmpty()) {
 			try {

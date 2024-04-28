@@ -385,6 +385,7 @@ import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 
 import connectBD.Connect_DB;
+import dao.DatBanDAO;
 import dao.NhanVienDAO;
 import dao.Nuoc_Dao;
 
@@ -492,7 +493,12 @@ public class MainFr extends JFrame {
         btnDatban.setIcon(new ImageIcon(getClass().getResource("/Photos/coffee-table (1).png"))); 
         btnDatban.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btnDatbanActionPerformed(evt);
+                try {
+					btnDatbanActionPerformed(evt);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }
         });
 
@@ -688,8 +694,13 @@ public class MainFr extends JFrame {
         banhang.setVisible(true);
     }
 
-    private void btnDatbanActionPerformed(ActionEvent evt) {
-        DatbanFr datban = new DatbanFr(detail);
+    private void btnDatbanActionPerformed(ActionEvent evt) throws SQLException {
+    	Connect_DB connectDB = Connect_DB.getInstance();
+        connectDB.connet();
+        DatBanDAO datBanDAO = new DatBanDAO(connectDB.getConnection());
+        
+        //DatbanFr datban = new DatbanFr(detail);
+        DatbanFr datban = new DatbanFr(datBanDAO);
         this.setVisible(false);
         datban.setVisible(true);
     }
