@@ -1,7 +1,15 @@
 
 package qlcf;
 
-//import Database.*;
+import Database.*;
+import connectBD.Connect_DB;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.view.JasperViewer;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -9,21 +17,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+
 import java.util.Vector;
 import javax.swing.*;
 import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
-//import net.sf.jasperreports.engine.*;
-//import net.sf.jasperreports.view.*;
 
 
 public class banhangFr extends javax.swing.JFrame implements Runnable,ActionListener{
 
-    private Detail detail;
+    private static final long serialVersionUID = 1L;
+	private Detail detail;
     private Thread thread;
     
-    //private MyDatabase SQL;
+    private MyDatabase SQL;
     
     private Connection conn=null, connCheck=null;
     private ResultSet rs=null, rsCheck=null;
@@ -44,9 +51,16 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
         taoBan();
         veBan();
         detail=new Detail(d);
-       // SQL=new MyDatabase(new SQL());
+        SQL=new MyDatabase(new SQL());
         lbNhanVien.setText(d.getName());
-       // conn=SQL.connection("THANHTRUNG", 1433, "QuanCaPhe", "sa", "sa2016");
+        Connect_DB connectDB = Connect_DB.getInstance();
+        try {
+            connectDB.connet(); // Kết nối với cơ sở dữ liệu
+            conn = Connect_DB.getConnection(); // Lấy kết nối từ lớp Connect_DB
+            System.out.println("Connect Ban Thành Công !!!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         lblTime.setText(String.valueOf(new SimpleDateFormat("HH:mm:ss").format(new java.util.Date())));
         lblDate.setText(String.valueOf(new SimpleDateFormat("EEEE dd/MM/yyyy").format(new java.util.Date())));
         
@@ -71,7 +85,7 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
     
     private void checkStatus(){
         String queryString="SELECT * FROM DatBan";
-      //  rsCheck=SQL.excuteQuery(conn, queryString);
+        rsCheck=SQL.excuteQuery(conn, queryString);
         String[] day=lblDate.getText().split("\\s");
         
         try{
@@ -79,7 +93,7 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
                 if(String.valueOf(rsCheck.getString("ngay").trim()).equals(day[1])){
                    
                     if((getHours(lblTime.getText())-getHours(String.valueOf(rsCheck.getString("thoiGian").trim())))==-1){
-                        //if(getMinute(rsCheck.getString("thoiGian").trim())>=30 && (getMinute(lblTime.getText())+(30-getMinute(String.valueOf(rsCheck.getString("thoiGian").trim()))))==60 || getMinute(rsCheck.getString("thoiGian").trim())<30 && (60-getMinute(lblTime.getText()))<=(30-getMinute(String.valueOf(rsCheck.getString("thoiGian").trim())))){
+                        if(getMinute(rsCheck.getString("thoiGian").trim())>=30 && (getMinute(lblTime.getText())+(30-getMinute(String.valueOf(rsCheck.getString("thoiGian").trim()))))==60 || getMinute(rsCheck.getString("thoiGian").trim())<30 && (60-getMinute(lblTime.getText()))<=(30-getMinute(String.valueOf(rsCheck.getString("thoiGian").trim())))){
                         if( getMinute(rsCheck.getString("thoiGian").trim())<30 && (60-getMinute(lblTime.getText()))<=(30-getMinute(String.valueOf(rsCheck.getString("thoiGian").trim())))){
                                 
                             for (JButton jButton : ban) {
@@ -104,7 +118,7 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
                                 if(jButton.getText().equals(String.valueOf(rsCheck.getInt("ban")))){
                                     jButton.setEnabled(true);
                                     String sql="DELETE FROM DatBan WHERE ban="+rsCheck.getInt("ban");
-                              //      SQL.excuteUpdata(conn, sql);
+                                    SQL.excuteUpdata(conn, sql);
                                 }
                             }
                         }
@@ -124,7 +138,7 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
                                 if(jButton.getText().equals(String.valueOf(rsCheck.getInt("ban")))){
                                     jButton.setEnabled(true);
                                     String sql="DELETE FROM DatBan WHERE ban="+rsCheck.getInt("ban");
-                                  //  SQL.excuteUpdata(conn, sql);
+                                    SQL.excuteUpdata(conn, sql);
                                 }
                             }
                         }
@@ -132,6 +146,7 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
                 }
             }
         }
+     }
         catch(Exception ex){
             ex.printStackTrace();
         }
@@ -215,7 +230,7 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
             String[] arry={"Tên thức uống","Số lượng","Thành tiền"};
             DefaultTableModel model=new DefaultTableModel(arry,0);
             
-         //   rs=SQL.excuteQuery(conn, sql);
+            rs=SQL.excuteQuery(conn, sql);
             
             while(rs.next()){
                 Vector vector=new Vector();
@@ -233,19 +248,19 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
     
     private void deleteThongTinHoaDon(){
         String sqlDelete="DELETE FROM ThongTinHoaDon";
-       // SQL.excuteUpdata(conn, sqlDelete);
+        SQL.excuteUpdata(conn, sqlDelete);
     }
     
     private void deleteHoaDon(){
         String sqlDelete="DELETE FROM HoaDon";
-       // SQL.excuteUpdata(conn, sqlDelete);
+        SQL.excuteUpdata(conn, sqlDelete);
     }
     
     private void checkTinhTrangban(){
         try {
             for (JButton jButton : ban) {
                 String sql="SELECT * FROM BanHang WHERE ban="+jButton.getText();
-            //    rs=SQL.excuteQuery(conn, sql);
+                rs=SQL.excuteQuery(conn, sql);
                 if(rs.next()){
                     jButton.setIcon(icon1);
                 }
@@ -261,7 +276,7 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
         String sqlCheck="SELECT * FROM QLNuoc WHERE tenNuoc=N'"+cbxNuoc.getSelectedItem()+"'";
         try{
             
-          //  rs=SQL.excuteQuery(conn, sqlCheck);
+            rs=SQL.excuteQuery(conn, sqlCheck);
             while(rs.next()){
                 if(rs.getInt("soLuong")==0){
                     lblStatus.setText(rs.getString("tenNuoc")+" hết hàng!!");
@@ -294,46 +309,59 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
         
         String sqlPay="SELECT * FROM BanHang WHERE ban="+lbBan.getText();
         try{
-          //  rs=SQL.excuteQuery(conn, sqlPay);
+            rs=SQL.excuteQuery(conn, sqlPay);
             while(rs.next()){
                 String []s1=rs.getString("thanhTien").toString().trim().split("\\s");
                 String []s2=lbTongTien.getText().split("\\s");
         
-                double totalMoney=convertedToNumbers(s1[0])+ convertedToNumbers(s2[0]);
-                DecimalFormat formatter = new DecimalFormat("###,###,###");
-                
-                lbTongTien.setText(formatter.format(totalMoney)+" "+s1[1]);
+                if (s1.length > 1) { // Kiểm tra xem mảng s1 có ít nhất hai phần tử không
+                    double totalMoney=convertedToNumbers(s1[0])+ convertedToNumbers(s2[0]);
+                    DecimalFormat formatter = new DecimalFormat("###,###,###");
+                    
+                    lbTongTien.setText(formatter.format(totalMoney)+" "+s1[1]);
+                } else {
+                    // Xử lý khi mảng chỉ có một phần tử
+                    double totalMoney=convertedToNumbers(s1[0])+ convertedToNumbers(s2[0]);
+                    DecimalFormat formatter = new DecimalFormat("###,###,###");
+                    
+                    lbTongTien.setText(formatter.format(totalMoney)); // Không cần thêm phần tử thứ hai nếu mảng chỉ có một phần tử
+                }
             }
         }
         catch(Exception ex){
             ex.printStackTrace();
         }
     }
-    
-    private void luuThongKe(){
-        String []s=lbTongTien.getText().split("\\s");
-        String sqlThongKe="INSERT INTO ThongKe (ban,tongTien,tienKH,tienThua,tenNV,ngay,thoiGian) VALUES("+lbBan.getText()+",N'"+lbTongTien.getText()+"',N'"+(tfTienNhanCuaKach.getText()+" "+ s[1])+"',N'"+lbTienthua.getText()+"',N'"+lbNhanVien.getText()+"','"+lblDate.getText()+"','"+lblTime.getText()+"')";
+ 
+    private void luuThongKe() {
+        String[] s = lbTongTien.getText().split("\\s");
+        String tienNhanCuaKach = tfTienNhanCuaKach.getText().isEmpty() ? "0" : tfTienNhanCuaKach.getText();
+        String currency = s.length > 1 ? s[1] : "VND"; // Kiểm tra xem mảng s có phần tử thứ hai không
         
-      //  SQL.excuteUpdata(conn, sqlThongKe);
+        String sqlThongKe = "INSERT INTO ThongKe (ban, tongTien, tienKH, tienThua, tenNV, ngay, thoiGian) VALUES (" +
+            lbBan.getText() + ", N'" + lbTongTien.getText() + "', N'" + (tienNhanCuaKach + " " + currency) + "', N'" + 
+            lbTienthua.getText() + "', N'" + lbNhanVien.getText() + "', '" + lblDate.getText() + "', '" + lblTime.getText() + "')";
+            
+        SQL.excuteUpdata(conn, sqlThongKe);
     }
-    
-//    private void consistency(){
-//        try{
-//            String sqlTemp="SELECT * FROM QLNuoc WHERE tenNuoc =N'"+cbxNuoc.getSelectedItem()+"'";
-//                    
-//            ResultSet rsTemp=SQL.excuteQuery(conn, sqlTemp);
-//                    
-//            if(rsTemp.next()){
-//                        
-//                String sqlUpdate="UPDATE QLNuoc SET soLuong="+(rsTemp.getInt("soLuong")-Integer.parseInt(tfSoLuong.getText()))+" WHERE tenNuoc=N'"+cbxNuoc.getSelectedItem()+"'";
-//                        
-//                SQL.excuteUpdata(conn, sqlUpdate);
-//            }
-//        }
-//        catch(Exception ex){
-//            ex.printStackTrace();
-//        }
-//    }
+
+    private void consistency(){
+        try{
+            String sqlTemp="SELECT * FROM QLNuoc WHERE tenNuoc =N'"+cbxNuoc.getSelectedItem()+"'";
+                    
+            ResultSet rsTemp=SQL.excuteQuery(conn, sqlTemp);
+                    
+            if(rsTemp.next()){
+                        
+                String sqlUpdate="UPDATE QLNuoc SET soLuong="+(rsTemp.getInt("soLuong")-Integer.parseInt(tfSoLuong.getText()))+" WHERE tenNuoc=N'"+cbxNuoc.getSelectedItem()+"'";
+                        
+                SQL.excuteUpdata(conn, sqlUpdate);
+            }
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+    }
     
     private void setIcon(String i){
         for (JButton jButton : ban) {
@@ -343,14 +371,14 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
 
     private void Delete(){
         String sqlDelete="DELETE FROM BanHang WHERE ban="+lbBan.getText();
-     //   SQL.excuteUpdata(conn, sqlDelete);
+        SQL.excuteUpdata(conn, sqlDelete);
     }
     
     private void addThucUong() {
         String sql="SELECT * FROM BanHang WHERE ban="+lbBan.getText();
         String sqlInsert="INSERT INTO BanHang (ban,tenNuoc,soLuong,thanhTien) VALUES("+lbBan.getText()+",N'"+cbxNuoc.getSelectedItem()+"',"+tfSoLuong.getText()+",N'"+lbThanhTien.getText()+"')";
         
-      //  SQL.excuteUpdata(conn, sqlInsert);
+        SQL.excuteUpdata(conn, sqlInsert);
         lblStatus.setText("Thêm sản phẩm thành công!");
         Disabled();
         loadData(sql);
@@ -360,10 +388,10 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
     private void addHoaDon() {
         String sql="SELECT * FROM BanHang WHERE ban="+lbBan.getText();
         try {
-         //   rs=SQL.excuteQuery(conn, sql);
+            rs=SQL.excuteQuery(conn, sql);
             while(rs.next()){
                 String sqlInsert="INSERT INTO HoaDon (tenNuoc,soLuong,thanhTien) VALUES(N'"+rs.getString("tenNuoc")+"',"+rs.getInt("soLuong")+",N'"+rs.getString("thanhTien")+"')";
-            //    SQL.excuteUpdata(conn, sqlInsert);
+                SQL.excuteUpdata(conn, sqlInsert);
             }
         }
         catch (Exception e) {
@@ -377,16 +405,13 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
         tfSoLuong.setText("");
         lbGia.setText("0 VNĐ");
         lbThanhTien.setText("0 VNĐ");
-        lbTongTien.setText("0 VNĐ");
+        lbTongTien.setText("0 "); // Không cần thêm đơn vị tiền tệ ở đây
         tfTienNhanCuaKach.setText("");
         lbTienthua.setText("0 VNĐ");
         tfPay.setEnabled(false);
         btnPrint.setEnabled(false);
         Disabled();
-    }
-    
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    } 
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
@@ -435,7 +460,7 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
 
         jLabel1.setFont(new java.awt.Font("Edwardian Script ITC", 0, 48)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Quán Cafe Demo");
+        jLabel1.setText("Quán Cafe 24");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Quản lý bàn", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 18))); // NOI18N
 
@@ -597,6 +622,7 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
 
         tfTienNhanCuaKach.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         tfTienNhanCuaKach.setText("0");
+        
         tfTienNhanCuaKach.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 tfTienNhanCuaKachKeyReleased(evt);
@@ -607,7 +633,7 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
         btnPrint.setEnabled(false);
         btnPrint.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-             //   btnPrintActionPerformed(evt);
+                btnPrintActionPerformed(evt);
             }
         });
 
@@ -626,7 +652,7 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
         btnHome.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Photos/smart-home (1).png"))); // NOI18N
         btnHome.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnHomeActionPerformed(evt);
+            	btnHomeActionPerformed(evt);
             }
         });
 
@@ -850,58 +876,99 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void tfPayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tfPayActionPerformed
-        deleteHoaDon();
-        deleteThongTinHoaDon();
-        if(Pay==true){
-            String sql="SELECT * FROM BanHang WHERE ban="+lbBan.getText();
-            Disabled();
-            String []s=lbTongTien.getText().split("\\s");
-            String sqlHoaDon="INSERT INTO ThongTinHoaDon (ban,tongTien,tienKH,tienThua,tenNV,ngay,thoiGian) VALUES("+lbBan.getText()+",N'"+lbTongTien.getText()+"',N'"+(tfTienNhanCuaKach.getText()+" "+ s[1])+"',N'"+lbTienthua.getText()+"',N'"+lbNhanVien.getText()+"','"+lblDate.getText()+"','"+lblTime.getText()+"')";
-            
-         //   SQL.excuteUpdata(conn, sqlHoaDon);
-            
-            addHoaDon();
-            luuThongKe();
-            Delete();
-            loadData(sql);
-            setIcon(lbBan.getText());
-            lblStatus.setText("Thực hiện thanh toán bàn "+lbBan.getText()+" thành công!");
-            Refresh();
-            
-            btnPrint.setEnabled(true);
-            btnAdd.setEnabled(false);
-            tfPay.setEnabled(false);
-            tfTienNhanCuaKach.setEnabled(false);
-        }
-        else if(Pay==false){
-            JOptionPane.showMessageDialog(null, "Bạn cần nhập số tiền khách hàng thanh toán !");
-        }
-    }//GEN-LAST:event_tfPayActionPerformed
-
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
         MainFr home = new MainFr(detail);
         this.setVisible(false);
         home.setVisible(true);
     }//GEN-LAST:event_btnHomeActionPerformed
 
-//    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
-//        try {
-//            JasperReport report=JasperCompileManager.compileReport("C:\\Users\\D.Thanh Trung\\Documents\\NetBeansProjects\\QLCF\\src\\qlcf\\HoaDon.jrxml");
-//            
-//            JasperPrint print=JasperFillManager.fillReport(report, null, conn);
-//            
-//            JasperViewer.viewReport(print,false);
-//        }
-//        catch (JRException ex) {
-//            ex.printStackTrace();
-//        }
-//    }//GEN-LAST:event_btnPrintActionPerformed
+   
+
+
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        try {
+            JasperReport report=JasperCompileManager.compileReport("C:\\Users\\nguye\\Downloads\\BTL\\QLCF\\src\\qlcf\\HoaDon.jrxml");
+           
+            JasperPrint print=JasperFillManager.fillReport(report, null, conn);
+            
+            JasperViewer.viewReport(print,false);
+        }
+        catch (JRException ex) {
+            ex.printStackTrace();
+        }
+    }//GEN-LAST:event_btnPrintActionPerformed
+
+
+    private void tfPayActionPerformed(java.awt.event.ActionEvent evt) {
+        deleteHoaDon();
+        deleteThongTinHoaDon();
+        if (Pay == true) {
+            String tongTienText = extractAmount(lbTongTien.getText()); // Lấy cả số tiền và đơn vị tiền tệ
+            String tienNhanText = extractAmount(tfTienNhanCuaKach.getText());
+
+            if (tongTienText.isEmpty() || tienNhanText.isEmpty()) {
+                lblStatus.setText("Chưa có thông tin tổng tiền hoặc tiền nhận!");
+                return;
+            }
+
+            // Debugging: Print the content of lbTongTien
+            System.out.println("Content of lbTongTien: " + tongTienText);
+
+            // Kiểm tra đơn vị tiền tệ
+            String currency = extractCurrency(lbTongTien.getText()); // Lấy đơn vị tiền tệ
+            if (currency.isEmpty()) {
+                lblStatus.setText("Lỗi: Không thể xác định đơn vị tiền tệ!");
+                return;
+            }
+
+            Disabled();
+            String sqlHoaDon = "INSERT INTO ThongTinHoaDon (ban, tongTien, tienKH, tienThua, tenNV, ngay, thoiGian) VALUES (" +
+                lbBan.getText() + ", N'" + tongTienText + "', N'" + (tienNhanText + " " + currency) + "', N'" + 
+                lbTienthua.getText() + "', N'" + lbNhanVien.getText() + "', '" + lblDate.getText() + "', '" + lblTime.getText() + "')";
+
+            SQL.excuteUpdata(conn, sqlHoaDon);
+
+            addHoaDon();
+            luuThongKe();
+            Delete();
+            loadData("SELECT * FROM BanHang WHERE ban = " + lbBan.getText());
+            setIcon(lbBan.getText());
+            lblStatus.setText("Thực hiện thanh toán bàn " + lbBan.getText() + " thành công!");
+            Refresh();
+
+            btnPrint.setEnabled(true);
+            btnAdd.setEnabled(false);
+            tfPay.setEnabled(false);
+            tfTienNhanCuaKach.setEnabled(false);
+        } else {
+            JOptionPane.showMessageDialog(null, "Bạn cần nhập số tiền khách hàng thanh toán !");
+        }
+    }
+
+
+    private String extractAmount(String text) {
+        String amount = text.replaceAll("[^\\d.]+", "");
+        return amount.trim();
+    }
+
+
+    private String extractCurrency(String text) {
+        // Kiểm tra xem chuỗi có chứa ký tự không phải là số hay không
+        if (!text.matches(".*[\\D].*")) {
+            return "VND"; // Trả về đơn vị tiền tệ mặc định khi chuỗi không chứa ký tự không phải là số
+        }
+
+        // Nếu chuỗi chứa ký tự không phải là số, loại bỏ tất cả các số và dấu chấm phẩy từ chuỗi
+        String currency = text.replaceAll("[\\d.]+", "").trim();
+        return currency;
+    }
+
+
+
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         addThucUong();
-       // consistency();
+        consistency();
         tinhTongTien();
     }//GEN-LAST:event_btnAddActionPerformed
 
@@ -910,7 +977,7 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
         String sql = "SELECT * FROM QLNuoc WHERE loaiNuoc=N'"+cbLoaiNuoc.getSelectedItem().toString()+"'";
         try {
             
-         //   rs=SQL.excuteQuery(conn, sql);
+            rs=SQL.excuteQuery(conn, sql);
             while(rs.next()){
                 this.cbxNuoc.addItem(rs.getString("tenNuoc").trim());
             }
@@ -937,7 +1004,7 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
         String sql = "SELECT * FROM QLNuoc WHERE tenNuoc=N'"+cbxNuoc.getSelectedItem()+"'";
         try {
             
-          //  rs=SQL.excuteQuery(conn, sql);
+            rs=SQL.excuteQuery(conn, sql);
             if(rs.next()){
                 lbGia.setText(rs.getString("giaBan").trim());
                 tfSoLuong.setEnabled(true);
@@ -949,85 +1016,93 @@ public class banhangFr extends javax.swing.JFrame implements Runnable,ActionList
         
         checkSoLuongHang();
     }//GEN-LAST:event_cbxNuocPopupMenuWillBecomeInvisible
-
     private void tfSoLuongKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tfSoLuongKeyReleased
         DecimalFormat formatter = new DecimalFormat("###,###,###");
-        
+
         tfSoLuong.setText(cutChar(tfSoLuong.getText()));
-        
-        if(tfSoLuong.getText().equals("")){
-            String []s=lbGia.getText().split("\\s");
-            lbThanhTien.setText("0"+" "+s[1]);
+
+        if (tfSoLuong.getText().equals("")) {
+            String[] s = lbGia.getText().split("\\s");
+            lbThanhTien.setText("0" + " " + (s.length > 1 ? s[1] : "")); // Kiểm tra chiều dài của mảng
             btnAdd.setEnabled(false);
-        }
-        else{
+        } else {
             //tfSoLuong.setText(cutChar(tfSoLuong.getText()));
-            
-            String sqlCheck="SELECT * FROM QLNuoc WHERE tenNuoc=N'"+cbxNuoc.getSelectedItem()+"'";
-            try{
-            
-         //   rs=SQL.excuteQuery(conn, sqlCheck);
-            
-                while(rs.next()){
-                    if((rs.getInt("soLuong")-Integer.parseInt(tfSoLuong.getText()))<0){
-                        String []s=lbGia.getText().split("\\s");
-                        lbThanhTien.setText("0"+" "+s[1]);
-                        
+
+            String sqlCheck = "SELECT * FROM QLNuoc WHERE tenNuoc=N'" + cbxNuoc.getSelectedItem() + "'";
+            try {
+
+                rs = SQL.excuteQuery(conn, sqlCheck);
+
+                while (rs.next()) {
+                    if ((rs.getInt("soLuong") - Integer.parseInt(tfSoLuong.getText())) < 0) {
+                        String[] s = lbGia.getText().split("\\s");
+                        //lbThanhTien.setText("0"+" "+s[1]);
+                        lbThanhTien.setText("0" + " " + (s.length > 1 ? s[1] : "")); // Kiểm tra chiều dài của mảng
                         lblStatus.setText("Số lượng sản phẩm bán không được vượt quá số lượng hàng trong kho!!");
                         btnAdd.setEnabled(false);
-                    }
-                    else{
-                        int soluong=Integer.parseInt(tfSoLuong.getText().toString());
-                        String []s=lbGia.getText().split("\\s");
-                        lbThanhTien.setText(formatter.format(convertedToNumbers(s[0])*soluong)+" "+s[1]);
-                        
+                    } else {
+                        int soluong = Integer.parseInt(tfSoLuong.getText().toString());
+                        String[] s = lbGia.getText().split("\\s");
+                        lbThanhTien.setText(formatter.format(convertedToNumbers(s[0]) * soluong) + " " + (s.length > 1 ? s[1] : "")); // Kiểm tra chiều dài của mảng
+
                         lblStatus.setText("Số lượng sản phẩm bán hợp lệ!!");
                         btnAdd.setEnabled(true);
                     }
                 }
-            }
-            catch(Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
     }//GEN-LAST:event_tfSoLuongKeyReleased
 
-    private void tfTienNhanCuaKachKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tfTienNhanCuaKachKeyReleased
+
+    private void tfTienNhanCuaKachKeyReleased(java.awt.event.KeyEvent evt) {
         DecimalFormat formatter = new DecimalFormat("###,###,###");
         
         tfTienNhanCuaKach.setText(cutChar(tfTienNhanCuaKach.getText()));
         
-        if(tfTienNhanCuaKach.getText().equals("")){
-            String []s=lbTongTien.getText().split("\\s");
-            lbTienthua.setText("0"+" "+s[1]);
+        if (lbTongTien.getText().isEmpty()) {
+            lblStatus.setText("Hãy chọn sản phẩm trước khi nhập số tiền khách đưa!");
+            return;
         }
-        else{
-            tfTienNhanCuaKach.setText(formatter.format(convertedToNumbers(tfTienNhanCuaKach.getText())));
-            
-            String s1=tfTienNhanCuaKach.getText();
-            String[] s2=lbTongTien.getText().split("\\s");
-            
-            if((convertedToNumbers(s1)-convertedToNumbers(s2[0]))>=0){
-                lbTienthua.setText(formatter.format((convertedToNumbers(s1)-convertedToNumbers(s2[0])))+" "+s2[1]);
-                lblStatus.setText("Số tiền khách hàng đưa đã hợp lệ!");
-                Pay=true;
-            }
-            else {
-                
-                lbTienthua.setText(formatter.format((convertedToNumbers(s1)-convertedToNumbers(s2[0])))+" "+s2[1]);
-                lblStatus.setText("Số tiền khách hàng đưa nhỏ hơn tổng tiền mua hàng trong hóa đơn!");
-                Pay=false;
-            }
+
+        String[] s2 = lbTongTien.getText().split("\\s");
+        String currency = "VNĐ"; // Đơn vị tiền tệ mặc định
+        if (s2.length < 2) {
+            lblStatus.setText("Không tìm thấy đơn vị tiền tệ, sử dụng đơn vị mặc định!");
+        } else {
+            currency = s2[1];
         }
-    }//GEN-LAST:event_tfTienNhanCuaKachKeyReleased
+
+        String s1 = tfTienNhanCuaKach.getText();
+        if (!s1.isEmpty()) {
+            if (s1.matches("\\d+(\\.\\d+)?")) {
+                double tienNhan = Double.parseDouble(s1);
+                double tongTien = convertedToNumbers(s2[0]);
+
+                if (tienNhan >= tongTien) {
+                    double tienThua = tienNhan - tongTien;
+                    lbTienthua.setText(formatter.format(tienThua) + " " + currency);
+                    lblStatus.setText("Số tiền khách hàng đưa đã hợp lệ!");
+                    Pay = true;
+                } else {
+                    lblStatus.setText("Số tiền khách hàng đưa nhỏ hơn tổng tiền mua hàng trong hóa đơn!");
+                    Pay = false;
+                }
+            } else {
+                lblStatus.setText("Số tiền nhập không hợp lệ!");
+                Pay = false;
+            }
+        } else {
+            lbTienthua.setText("0" + " " + currency);
+            lblStatus.setText("Số tiền khách hàng đưa đã hợp lệ!");
+            Pay = true;
+        }
+    }
 
 
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
+       
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {

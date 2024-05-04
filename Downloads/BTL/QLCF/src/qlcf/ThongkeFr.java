@@ -1,10 +1,13 @@
 
 package qlcf;
 
-//import Database.MyDatabase;
-//import Database.SQL;
+import Database.MyDatabase;
+import Database.SQL;
+import connectBD.Connect_DB;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Vector;
@@ -14,7 +17,7 @@ import javax.swing.table.DefaultTableModel;
 public class ThongkeFr extends javax.swing.JFrame {
 
     private Detail detail;
-  //  private MyDatabase SQL;
+    private MyDatabase SQL;
     
     private Connection conn=null;
     private ResultSet rs=null;
@@ -30,9 +33,15 @@ public class ThongkeFr extends javax.swing.JFrame {
         setLocationRelativeTo(this);
         detail=new Detail(d);
         
-     //   SQL=new MyDatabase(new SQL());
-      //  conn=SQL.connection("THANHTRUNG", 1433, "QuanCaPhe", "sa", "sa2016");
-        
+        SQL=new MyDatabase(new SQL());
+        Connect_DB connectDB = Connect_DB.getInstance();
+        try {
+            connectDB.connet(); // Kết nối với cơ sở dữ liệu
+            conn = Connect_DB.getConnection(); // Lấy kết nối từ lớp Connect_DB
+            System.out.println("Connect thongke Thành Công !!!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         cbxYear.setValue(Double.parseDouble(new SimpleDateFormat("yyyy").format(new java.util.Date())));
         checkYear(); 
         addDay();
@@ -48,7 +57,7 @@ public class ThongkeFr extends javax.swing.JFrame {
             String[] arry={"Bàn","Tổng tiền","Tiền nhận của khách","Tiền thừa","Tên nhân viên","Ngày Bán","Thời gian"};
             DefaultTableModel model=new DefaultTableModel(arry,0);
             
-        //    rs=SQL.excuteQuery(conn, sql);
+            rs=SQL.excuteQuery(conn, sql);
             
             while(rs.next()){
                 Vector vector=new Vector();
@@ -65,7 +74,7 @@ public class ThongkeFr extends javax.swing.JFrame {
                 count++;
             }
             tableThongke.setModel(model);
-         //   SQL.closeResultSet( rs);
+            SQL.closeResultSet( rs);
             lblSoHoaDon.setText(String.valueOf(count));
             lblTongDoanhThu.setText(formatter.format(tongTien)+" "+"VND");
         }
@@ -189,7 +198,7 @@ public class ThongkeFr extends javax.swing.JFrame {
              String[] arry={"Bàn","Tổng tiền","Tiền nhận của khách","Tiền thừa","Tên nhân viên","Ngày Bán","Thời gian"};
             DefaultTableModel modle=new DefaultTableModel(arry,0);
             
-        //    rs=SQL.excuteQuery(conn, sql);
+            rs=SQL.excuteQuery(conn, sql);
             while(rs.next()){
                 if(getDay(rs.getString("ngay"))==Double.parseDouble(cbxDay.getSelectedItem().toString()) && getMonth(rs.getString("ngay"))==Double.parseDouble(cbxMonth.getSelectedItem().toString()) && getYear(rs.getString("ngay"))==Double.parseDouble(cbxYear.getValue().toString())){
                     Vector vector=new Vector();
@@ -223,7 +232,7 @@ public class ThongkeFr extends javax.swing.JFrame {
             String[] arry={"Bàn","Tổng tiền","Tiền nhận của khách","Tiền thừa","Tên nhân viên","Ngày Bán","Thời gian"};
             DefaultTableModel modle=new DefaultTableModel(arry,0);
             
-          //  rs=SQL.excuteQuery(conn, sql);
+            rs=SQL.excuteQuery(conn, sql);
             
             while(rs.next()){
                 if(getMonth(rs.getString("ngay"))==Double.parseDouble(cbxMonth.getSelectedItem().toString()) && getYear(rs.getString("ngay"))==Double.parseDouble(cbxYear.getValue().toString())){
@@ -258,7 +267,7 @@ public class ThongkeFr extends javax.swing.JFrame {
             String[] arry={"Bàn","Tổng tiền","Tiền nhận của khách","Tiền thừa","Tên nhân viên","Ngày Bán","Thời gian"};
             DefaultTableModel modle=new DefaultTableModel(arry,0);
             
-         //   rs=SQL.excuteQuery(conn, sql);
+            rs=SQL.excuteQuery(conn, sql);
             while(rs.next()){
                 if(getYear(rs.getString("ngay"))==Double.parseDouble(cbxYear.getValue().toString())){
                     Vector vector=new Vector();

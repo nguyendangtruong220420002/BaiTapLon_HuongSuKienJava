@@ -8,5 +8,18 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="src/Library/sqljdbc4.jar"/>
 	<classpathentry kind="lib" path="src/jcalendar-1.4.jar"/>
+	<classpathentry kind="lib" path="src/Library/jasperreports-5.5.0.jar"/>
+	<classpathentry kind="lib" path="src/Library/commons-beanutils-1.8.2.jar"/>
+	<classpathentry kind="lib" path="src/Library/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="src/Library/commons-digester-2.1.jar"/>
+	<classpathentry kind="lib" path="src/Library/Database.jar"/>
+	<classpathentry kind="lib" path="src/Library/commons-logging-1.1.jar"/>
+	<classpathentry kind="lib" path="src/Library/groovy-all-2.4.14.jar"/>
+	<classpathentry kind="lib" path="src/Library/jdt-compiler-3.1.1.jar"/>
+	<classpathentry kind="lib" path="src/Library/joda-time-2.1.jar"/>
+	<classpathentry kind="lib" path="src/Library/servlet-api-2.4.jar"/>
+	<classpathentry kind="lib" path="src/Library/MySQL.jar"/>
+	<classpathentry kind="lib" path="src/Library/spring.jar"/>
+	<classpathentry kind="lib" path="src/Library/SQL.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

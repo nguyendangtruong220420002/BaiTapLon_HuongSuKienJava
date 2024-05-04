@@ -385,6 +385,7 @@ import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 
 import connectBD.Connect_DB;
+import dao.BanDAO;
 import dao.DatBanDAO;
 import dao.NhanVienDAO;
 import dao.Nuoc_Dao;
@@ -479,7 +480,9 @@ public class MainFr extends JFrame {
         btnBanhang.setIcon(new ImageIcon(getClass().getResource("/Photos/cafe.png"))); 
         btnBanhang.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btnBanhangActionPerformed(evt);
+                
+					btnBanhangActionPerformed(evt);
+				
             }
         });
 
@@ -689,8 +692,9 @@ public class MainFr extends JFrame {
     }
 
     private void btnBanhangActionPerformed(ActionEvent evt) {
-        banhangFr banhang = new banhangFr(detail);
+    	banhangFr banhang = new banhangFr(detail);
         this.setVisible(false);
+    
         banhang.setVisible(true);
     }
 
